@@ -1,0 +1,11 @@
+meta.tex
+*.aux
+*.out
+*.log
+*.pdf
+*.toc
+*.swp
+*.bbl
+*.blg
+*.bbl
+*.blg
