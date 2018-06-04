@@ -37,16 +37,35 @@ This is the test report for \milestoneId{} (\milestoneName{}), an LSST DM level 
 \section{Introduction}
 \label{sect:intro}
 
-The LDM-503-1 milestone calls for the principal WISE primary mission and NEOWISE first-year catalogs to be loaded into the LSP Integration Environment, also known as the Prototype Data Access Center.
+\subsection{Objectives}
+\label{sect:objectives}
+
+The \milestoneId{} milestone calls for the principal WISE primary mission and NEOWISE first-year catalogs to be loaded into the LSP Integration Environment, also known as the Prototype Data Access Center.
 The LSP-00 test specification, defined in LDM-540, was used to verify that the data were loaded and that the data service provided meets a subset of requirements for functionality of the API Aspect and the Portal Aspect of the Science Platform.
+
+\subsection{Scope}
+\label{sect:scope}
+
+The LSP-00 test specification describes a comprehensive set of tests exploring the functionality of the Science Platform as applied to catalog and image data.
+The following test cases were carried out as part of the verification of this milestone:
+
+\begin{description}
+\item[LSP-00-00]{Verification of the presence of the expected WISE data}
+\item[LSP-00-05]{Demonstration of low-volume and/or indexed queries against the WISE data via API}
+\item[LSP-00-10]{Demonstration of table-scan queries against the WISE data via API}
+\item[LSP-00-15]{Execution of basic catalog queries in the Portal}
+\item[LSP-00-20]{Operation of the UI for interaction with tabular data results}
+\item[LSP-00-35]{Linkage of catalog query results to related catalog data}
+\end{description}
 
 The LSP-00-25 and LSP-00-30 test cases are not included in this report, as they address image data functionality and the WISE data load to PDAC in the end did not include the image data.
 The decision to avoid loading the image data was taken when the time required to load the WISE catalog data turned out to be larger than originally expected, and also required unanticipated hardware upgrades.
-In addition to the tiem required for Loading the WISE image data, providing a useful image cutout service would have required developing an LSST-stack (\verb|afw|) camera model for WISE, and this was judged to be an effort with very limited benefit to DM development.
-The key usefulness of the WISE data in the DM context is as a scientifically realistic scaling test for Qserv, requiring the handling of tens of billions of rows.
-These test cases can be performed against the SDSS data previously loaded in the PDAC, and will be executed and documented separately.\footnote{As a user convenience, the Portal Aspect in PDAC does provide some limited access to WISE image data directly from IRSA, but as it does not use LSST interfaces to do so, it is not included in this test.}
+In addition to the time required for loading the WISE image data, providing a useful image cutout service would have required developing an LSST-stack (\verb|afw|) camera model for WISE, and this was judged to be an effort with very limited benefit to DM development.
+The key usefulness of the WISE data in the DM context is as a scientifically realistic scaling test for Qserv, requiring the handling of tens of billions of rows, so the priorities for the data loading were set accordingly.
 
-The WISE catalog data to be loaded include the following tables:
+The image-oriented test cases can be performed against the SDSS data previously loaded in the PDAC, and will be executed and documented separately.\footnote{As a user convenience, the Portal Aspect in PDAC does provide some limited access to WISE image data directly from IRSA, but as it does not use LSST interfaces to do so, it is not included in this test.}
+
+The WISE catalog data to be loaded included the following tables:
 
 \begin{itemize}
 
@@ -67,11 +86,93 @@ The four eras and the associated official table names are:
   \end{itemize}
 \end{itemize}
 
-The LSP-00 tests verified that these tables were present on the PDAC and exercised a variety of operations against them.  
-The rest of this report covers the eight test cases into which this work was divided.
+The LSP-00 tests verified that these tables were present on the PDAC and exercised a variety of operations against them in the Portal and API Aspects.
+The rest of this report covers the six test cases into which this work was divided.
+
+\subsection{System Overview}
+\label{sect:systemoverview}
+
+The \product{} is the part of the LSST Data Management System which presents the LSST Data Products,
+a user computational environment, and a set of tools for interacting with them, 
+to LSST's science users.
+
+The system under test is the initial deployment of the \product{} in the Prototype Data Access Center (PDAC),
+an initial application of the NCSA-provided ``integration environment''.
+In the tested version of the PDAC, 
+elements of the database systems (including a Qserv prototype),
+a partial deployment of the API Aspect data access Web services (DAX),
+and an early version of the Science User Interface and Tools (SUIT) Portal were operated on a hardware cluster managed by NCSA.
+The Notebook Aspect was not included in this deployment at all.
+
+Software deployment was done essentially manually on the systems provided by NCSA,
+in some cases by traditional software installation and in some using Docker containers,
+but no Kubernetes layer was involved.
+
+\subsection{Applicable Documents}
+\label{sect:appdocs}
+
+\begin{tabular}[htb]{l l}
+% \citeds{LDM-294} & LSST DM Project Management Plan\\
+% \citeds{LDM-503} & DM Test Plan\\
+% \citeds{LDM-540} & \product{} Test Specification\\
+LDM-294 & LSST DM Project Management Plan\\
+LDM-503 & DM Test Plan\\
+LDM-540 & \product{} Test Specification\\
+\end{tabular}
+
+
+\section{Personnel}
+\label{sect:personnel}
+
+All test cases were executed by Gregory Dubois-Felsmann (Caltech/IPAC).
+
+
+\subsection{Summary Table}
+\label{sect:summarytable}
+
+\begin{longtable} {|p{0.2\textwidth}|p{0.2\textwidth}|p{0.6\textwidth}|}\hline
+{\bf TEST CASE ID} & {\bf PASS/FAIL} & {\bf COMMENTS} \\\hline
+LSP-00-00 & Pass & Refer to \S\ref{sect:detail-lsp-00-00}. \\\hline
+LSP-00-05 & Pass & Refer to \S\ref{sect:detail-lsp-00-05}. \\\hline
+LSP-00-10 & Pass & Refer to \S ref{sect:lsp-00-10}. \\\hline
+LSP-00-15 & Pass & Refer to \S ref{sect:lsp-00-15}. \\\hline
+LSP-00-20 & Pass & Refer to \S ref{sect:lsp-00-30}. \\\hline
+LSP-00-35 & Pass & Refer to \S ref{sect:lsp-00-35}. \\\hline
+\end{longtable}
+
+\subsection{Overall Assessment}
+\label{sect:overallassessment}
+
+The test cases executed passed with a variety of minor issues relating to the details of the data import and features not fully implemented in this early version of the Science Platform.
+Overall the test showed that it was possible to import a several $\times 10^8$ row dataset and access it usefully through Qserv and the Portal and API Aspects.
+
+\subsection{Impact of Test Environment}
+\label{sect:impact}
+
+As noted above, the deployment of the database, API Aspect, and Portal Aspect components did not use Kubernetes and is not reflective of the planned final system.
+This affected not only the management of the components but substantive technical aspects of their behavior;
+in particular, in the Kubernetes deployment there will be ingress controllers and other components that affect the connections between components.
+
+Furthermore, the external access control to the components was through a VPN rather than by means of LSP-level authentication and authorization,
+and therefore most likely not reflective of parameters such the latency and throughput to be expected from the final system.
+
+No tests of authorization and access control behaviors were performed.
+
+
+\subsection{Recommended Improvements}
+\label{sect:recommendations}
+
+\begin{itemize}
+
+\item{The current cone-search query size limits in the Portal are unreasonably small and Qserv would clearly support larger ones.}
+\item{The PDAC TAP service does not support standard ADQL and required the use of Qserv-specific functions in order to exploit its performance successfully.}
+
+\end{itemize}
+
+
 
 \section{LSP-00-00: Verification of the presence of the expected WISE data}
-\label{sect:lsp-00-00}
+\label{sect:detail-lsp-00-00}
 
 The tests were performed primarily from an Apple laptop computer running OS X 10.11.6, wirelessly connected to the Internet and using the NCSA VPN at \texttt{vpn.illinois.edu}.
 API Aspect queries were performed using a combination of the Python \texttt{requests} package and the \texttt{curl} command.
@@ -175,7 +276,7 @@ The Portal Aspect was accessed in order to verify the accessibility of the WISE 
 
 This work covers step 6 of the LSP-00-00 test case procedure.
 
-\subsubsection{Step 6c}
+\subsubsection{Step 6a}
 
 The front page of the Portal Aspect for this test was:
 
@@ -183,7 +284,7 @@ The front page of the Portal Aspect for this test was:
 \texttt{https://lsst-sui-proxy01.ncsa.illinois.edu/suit/}
 \end{center}
 
-\subsubsection{Step 6c}
+\subsubsection{Step 6b}
 
 The front page presents an ``LSST Data'' screen which offers the catalog data available for access, associated with three ``projects'': SDSS, AllWISE, and the WISE and NEOWISE single-epoch photometry.
 
@@ -252,7 +353,92 @@ Note the much larger number of sources for the NEOWISE-R single-epoch table quer
 
 
 \section{LSP-00-05: Demonstration of low-volume and/or indexed queries against the WISE data via API}
-\label{sect:lsp-00-05}
+\label{sect:detail-lsp-00-05}
+
+The tests were performed primarily from an Apple laptop computer running OS X 10.11.6, wirelessly connected to the Internet and using the NCSA VPN at \texttt{vpn.illinois.edu}.
+API Aspect queries were performed using a combination of the Python \texttt{requests} package and the \texttt{curl} command.
+Notebooks were executed using Jupyter versions up through 5.4.1 and Python version 3.6.1.
+
+\subsection{API Aspect tests}
+
+This test case consisted only of API Aspect tests.
+
+The API Aspect tests made use of the "v0" \texttt{dbserv} service at 
+
+\begin{center}
+\texttt{http://lsst-qserv-dax01.ncsa.illinois.edu:5000/db/v0/tap/sync},
+\end{center}
+
+as for LSP-00-00 above.
+
+Comparison data was obtained from the IRSA TAP service at
+
+\begin{center}
+\texttt{https://irsa.ipac.caltech.edu/TAP/sync}.
+\end{center}
+
+This service accepts SQL queries, forwards them to Qserv for execution, and returns the results as JSON structures.
+The open-source Python \emph{Requests} package\footnote{\texttt{http://github.com/requests/requests}} was used to perform the HTTP GET and POST operations required, and to parse the returned JSON structures into Python dictionaries.
+The builtin Python \texttt{xml.etree.ElementTree} class was used to parse the VOTable data returned from the IRSA TAP service.
+
+\subsubsection{Summary}
+
+The tests successfully verified that the PDAC and IRSA services return the same data for small-diameter cone searches, 
+down to floating point roundoff issues associated with the return of data as ASCII strings.
+
+The cone search queries were performed in the Galactic plane near Galactic coordinates ( 30, 0 ),
+expressed as ( \emph{ra} = 281.5, \emph{dec} = -2.6 ), with a radius of 100 arcseconds.
+The radius was chosen to match the largest currently available radius for cone searches in the Portal UI 
+(a relatively arbitrary number originally chosen based on IRSA experience with querying the MultiEpoch Photometry table).
+
+In general the PDAC queries executed substantially more quickly than the IRSA ones.
+IRSA queries on the tables tested took several times longer.
+The IRSA times fluctuated more on repeated access, 
+presumably because IRSA is an active community archive and has a fluctuating load of other queries.
+
+The two TAP services do not accept the same language at this time.
+DAX \texttt{dbserv} ``v0'' does not implement ADQL spatial query constructs, 
+but does require the use of special Qserv UDFs to enable optimized spatial queries.
+As a result, the spatial \texttt{WHERE} clauses look quite different.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l}
+TAP Service & \texttt{WHERE} clause \\ \hline
+PDAC \texttt{dbserv} & \verb|qserv_areaspec_circle(| \texttt{281.5, -2.6, 0.027777777777777776 )} \\
+IRSA (ADQL) & \texttt{CONTAINS(POINT('J2000',ra,dec),CIRCLE('J2000',281.5,-2.6,0.027777777777777776))=1} \\
+\end{tabular}
+\caption{Comparison of PDAC and IRSA cone search query syntax}
+\label{tab:conesyntax}
+\end{table}
+
+\subsubsection{Queries performed}
+
+The cone-search queries returned the following results, with a range of elapsed times noted for repeating the query several times.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.5 \linewidth} p{0.1 \linewidth} p{0.1 \linewidth} p{0.12 \linewidth} p{0.12 \linewidth}}
+Table & Unique Object Keys & Rows & PDAC elapsed time & IRSA elapsed time \\ \hline
+``Object'' \verb|wise_00.allwise_p3as_psd| & 48 & 48 & 0.2 -- 0.6s & 1.4 -- 3.2s \\
+``ForcedSource'' \verb|wise_00.allwise_p3as_mep| & 56 & 1377 & 0.8 -- 1.8s & 6.1 -- 6.6s \\
+``Source'' \verb|wise_4band_00.allsky_4band_p1bs_psd| & 506 & 506 & 0.5 -- 0.6s & 1.6 -- 3.3s \\
+\end{tabular}
+\caption{Search results from small cone searches}
+\label{tab:conesyntax}
+\end{table}
+
+All the sources found in the Object-like table were found in the ForcedSource-like table.
+Note that the WISE data analysis includes forced photometry on lower-quality objects,
+not just those in the main Object-like ``AllWISE Source Catalog'';
+this is why there are more unique object keys in the ForcedSource-like table search result than in the Object-like searh result.
+
+All the IDs were tested for exact equality, with no failures.
+All queries retrieved \verb|ra|, \verb|decl|, and the WISE W1 and W1 magnitudes \verb|w1mpro| and \verb|w2mpro|.
+The time-dependent queries also retrieved the MJD mid-point of the corresponding observations.
+All these floating-point values were found to be equal to the limits of the round trip through the slightly different ASCII formats produced by the two services;
+in general discrepancies occurred when the IRSA TAP service returned additional non-significant digits,
+producing values like 4.3340000000000005.
 
 \section{LSP-00-10: Demonstration of table-scan queries against the WISE data via API}
 \label{sect:lsp-00-10}
