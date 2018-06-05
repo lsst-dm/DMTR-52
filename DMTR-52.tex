@@ -164,8 +164,18 @@ No tests of authorization and access control behaviors were performed.
 
 \begin{itemize}
 
-\item{The current cone-search query size limits in the Portal are unreasonably small and Qserv would clearly support larger ones.}
-\item{The PDAC TAP service does not support standard ADQL and required the use of Qserv-specific functions in order to exploit its performance successfully.}
+\item{The current cone-search query size limits in the Portal are unreasonably small and Qserv would clearly support larger ones.
+The Portal's polygon search capability already permits the searching of much larger regions with good performance, so the limitation seems unnecessary.}
+\item{The PDAC TAP service does not support standard ADQL and required the use of Qserv-specific functions in order to exploit its performance successfully.
+We look forward to the implementation of at least a basic subset of ADQL's geometry constructs.}
+\item{The PDAC TAP service should support the VOTable data format.
+The service should be tested using publically available validators.}
+\item{All tables should be readily searchable by their primary key with good performance.
+In the case of the WISE tables there is the oddity that the primary keys appear in both integer and string forms.
+For public usability of the WISE service we recommend ensuring that both forms are indexed as needed for good performance.
+The data model and database teams should remain alert to the possibility of a similar situation arising in the LSST data model.}
+\item{We strongly recommend that there be both programmatic and visual interfaces that aid users in determining whether their queries have triggered, or are likely to trigger, table scans.
+This information should also be available from user-oriented documentation about the materialization of release data in the LSP.}
 
 \end{itemize}
 
@@ -448,7 +458,7 @@ Table & Unique Object Keys & Rows & PDAC elapsed time & IRSA elapsed time \\ \hl
 All the sources found in the Object-like table were found in the ForcedSource-like table.
 Note that the WISE data analysis includes forced photometry on lower-quality objects,
 not just those in the main Object-like ``AllWISE Source Catalog'';
-this is why there are more unique object keys in the ForcedSource-like table search result than in the Object-like searh result.
+this is why there are more unique object keys in the ForcedSource-like table search result than in the Object-like search result.
 
 All the IDs were tested for exact equality, with no failures.
 All queries retrieved \verb|ra|, \verb|decl|, and the WISE W1 and W1 magnitudes \verb|w1mpro| and \verb|w2mpro|.
@@ -474,7 +484,7 @@ was used to perform a comparable, though not particularly interesting, test on t
 
 Pure identifier searches on the numeric ids, \verb|cntr| and \verb|cntr_mf|,
 were impractical on the PDAC tables because these triggered table scans (see \S ref{sect:detail-lsp-00-10} below).
-This occurs because:
+This is because, currently:
 
 \begin{enumerate}
 \item{No Qserv ``secondary index'' for this identifier was created, so Qserv must attempt to search every shard.}
@@ -482,7 +492,7 @@ This occurs because:
 \end{enumerate}
 
 This issue arose during PDAC development,
-and a substitute was used in the implementation of the initial Portal Aspect prototype for light curve retrieval.
+and a workaround was used in the implementation of the initial Portal Aspect prototype for light curve retrieval.
 Given a target already located in a search on the Object-like table,
 in order to look up the light curve in the ForcedSource-like table, 
 a search was performed on the combination of the numeric ID and a small spatial cone around the known location of the target.
@@ -500,11 +510,11 @@ reported in the following section.
 \centering
 \begin{tabular}{l l r r r}
 Table and key & ID type & Rows & PDAC elapsed time & IRSA elapsed time \\ \hline
-``Object'' \verb|source_id| & string & 1 & 0.19 -- 0.20s & 1.5 -- 5.3s \\
-``Object'' \verb|cntr| & bigint(20) & 1 & X\footnote{This query was executed with an added ``qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 )'' in the WHERE clause to avoid triggering a table scan.\label{fn:id-no-table-scan}} & ??? \\
+``Object'' \verb|source_id| & string & 1 & 0.13 -- 0.20s & 1.4 -- 5.3s \\
+``Object'' \verb|cntr| & bigint(20) & 1 & 0.18 -- 0.19s\footnote{This query was executed with an added ``qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 )'' in the WHERE clause to avoid triggering a table scan.\label{fn:id-no-table-scan}} & 1.7 -- 10.5s \\
 ``ForcedSource'' \verb|source_id_mf| & string & 25 & 0.18 -- 0.20s & 0.7 -- 4.5s \\
-``ForcedSource'' \verb|cntr_mf| & bigint(20) & 25 & X\footnotemark[4] & ??? \\
-``Source'' & string & 1 & ??? & ??? \\
+``ForcedSource'' \verb|cntr_mf| & bigint(20) & 25 & 0.11 -- 0.41s\footnotemark[4] & 0.7 -- 30.0s\footnote{Most results were in the 2.5--3s range; 30s times appeared a few time } \\
+``Source'' & string & 1 & 0.18 -- 0.21s & 1.5 -- 5.2s \\
 \end{tabular}
 \caption{Search results from queries by identifier}
 \label{tab:conesyntax}
@@ -522,16 +532,16 @@ i.e., where the indexing can only accelerate the per-shard queries but cannot yi
 
 
 \section{LSP-00-10: Demonstration of table-scan queries against the WISE data via API}
-\label{sect:lsp-00-10}
+\label{sect:detail-lsp-00-10}
 
 \section{LSP-00-15: Execution of basic catalog queries in the Portal}
-\label{sect:lsp-00-15}
+\label{sect:detail-lsp-00-15}
 
 \section{LSP-00-20: Operation of the UI for interaction with tabular data results}
-\label{sect:lsp-00-20}
+\label{sect:detail-lsp-00-20}
 
 \section{LSP-00-35: Linkage of catalog query results to related catalog data}
-\label{sect:lsp-00-35}
+\label{sect:detail-lsp-00-35}
 
 
 \end{document}
