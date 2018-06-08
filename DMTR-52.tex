@@ -136,14 +136,16 @@ LSP-00-00 & Pass & Refer to \S\ref{sect:detail-lsp-00-00}. \\\hline
 LSP-00-05 & Pass & Refer to \S\ref{sect:detail-lsp-00-05}. \\\hline
 LSP-00-10 & Pass & Refer to \S ref{sect:lsp-00-10}. \\\hline
 LSP-00-15 & Pass & Refer to \S ref{sect:lsp-00-15}. \\\hline
-LSP-00-20 & Pass & Refer to \S ref{sect:lsp-00-30}. \\\hline
-LSP-00-35 & Pass & Refer to \S ref{sect:lsp-00-35}. \\\hline
+LSP-00-20 & Pass with reservations & Refer to \S\ref{sect:detail-lsp-00-20}. \\\hline
+LSP-00-35 & Pass & Refer to \S\ref{sect:detail-lsp-00-35}. \\\hline
 \end{longtable}
 
 \subsection{Overall Assessment}
 \label{sect:overallassessment}
 
-The test cases executed passed with a variety of minor issues relating to the details of the data import and features not fully implemented in this early version of the Science Platform.
+The test cases executed passed with a variety of minor issues relating to the details of the data import and features not fully implemented in this early version of the Science Platform,
+as well as to some rather arbitrary numeric limits in the deployed portal.
+The latter affected primarily LSP-00-20 and are described in more detail there.
 Overall the test showed that it was possible to import a several $\times 10^8$ row dataset and access it usefully through Qserv and the Portal and API Aspects.
 
 \subsection{Impact of Test Environment}
@@ -162,10 +164,32 @@ No tests of authorization and access control behaviors were performed.
 \subsection{Recommended Improvements}
 \label{sect:recommendations}
 
-\begin{itemize}
+\begin{enumerate}
 
 \item{The current cone-search query size limits in the Portal are unreasonably small and Qserv would clearly support larger ones.
-The Portal's polygon search capability already permits the searching of much larger regions with good performance, so the limitation seems unnecessary.}
+The Portal's polygon search capability already permits the searching of much larger regions with good performance,
+so the limitation seems unnecessary.}
+\item{The as-deployed Portal limits 2D scatterplots to a maximum of 5,000 points before switching to 2D histograms.
+This was motivated by some concerns about earlier versions of the underlying \verb|Plotly| library slowing down visibly for denser scatterplots.
+This fallback behavior is not clearly documented or signaled by the UI behavior,
+so the user will have some difficulty anticipating it and working around it.
+In IRSA production this limit has recently been raised somewhat, while still preserving reasonable performance for larger scatterplots.
+This change should be deployed immediately in LSST production.
+In addition, a recently developed alternate Web visualization implementation for large scatterplots, based on WebGL, has been developed for \verb|Plotly|.
+This implementation is said to scale to over a million points.
+If it can be used in Firefly without other significant impacts, we strongly encourage that.
+Note that the Firefly tabular data model supports multi-million row tables already.}
+\item{The UI functionality related to 2D histograms, called ``heat maps'', should be improved to support more quantitative exploitation.
+In particular, the UI should permit the upper and lower bin limits to be specified by the user, not just the number of bins.
+If this worked just as it does for 1D histograms, that would be fine.
+This would help the user in obtaining simpler bin boundaries.
+Also, both types of histograms should provide support for writing out the histogram contents as a table.}
+\item{The UI procedure for filtering on manual row selections is not intuitive and requires some attentive exploration in order to discover.  This may need to be rethought.}
+\item{The interaction of column filters with row selections needs to be rethought; in particular, row selections should not be cleared by the application of column filters.}
+\item{The UI for applying rectangular selections to 2D plots could be improved in two ways:
+display moving guide marks along the X and Y axes as the selection is drawn,
+facilitating by-eye measurement of the quantitative region boundaries; and once a drawn-rectangle filter has been applied,
+its specifications should be accessible in the filter dialogs to allow recording the exact values used.}
 \item{The PDAC TAP service does not support standard ADQL and required the use of Qserv-specific functions in order to exploit its performance successfully.
 We look forward to the implementation of at least a basic subset of ADQL's geometry constructs.}
 \item{The PDAC TAP service should support the VOTable data format.
@@ -177,14 +201,14 @@ The data model and database teams should remain alert to the possibility of a si
 \item{We strongly recommend that there be both programmatic and visual interfaces that aid users in determining whether their queries have triggered, or are likely to trigger, table scans.
 This information should also be available from user-oriented documentation about the materialization of release data in the LSP.}
 
-\end{itemize}
+\end{enumerate}
 
 
 
 \section{LSP-00-00: Verification of the presence of the expected WISE data}
 \label{sect:detail-lsp-00-00}
 
-The tests were performed primarily from an Apple laptop computer running OS X 10.11.6, wirelessly connected to the Internet and using the NCSA VPN at \texttt{vpn.illinois.edu}.
+The tests were performed primarily from an Apple laptop computer running OS X 10.11.6, wirelessly connected to the Internet and using the NCSA VPN at \texttt{vpn.ncsa.illinois.edu}.
 API Aspect queries were performed using a combination of the Python \texttt{requests} package and the \texttt{curl} command.
 Notebooks were executed using Jupyter versions up through 5.4.1 and Python version 3.6.1.
 The Portal was accessed using Safari 11.0.2.
@@ -540,6 +564,8 @@ i.e., where the indexing can only accelerate the per-shard queries but cannot yi
 
 \section{LSP-00-20: Operation of the UI for interaction with tabular data results}
 \label{sect:detail-lsp-00-20}
+
+\input lsp-00-20/lsp-00-20.tex
 
 \section{LSP-00-35: Linkage of catalog query results to related catalog data}
 \label{sect:detail-lsp-00-35}
