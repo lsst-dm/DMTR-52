@@ -121,10 +121,40 @@ LDM-540 & \product{} Test Specification\\
 \end{tabular}
 
 
+\section{Test Configuration}
+
+\subsection{Documents}
+
+The v1.0 version of LDM-540 was used to guide the tests.
+In the process of performing the tests some editing errors were found in LDM-540 and corrections will be submitted.
+These mainly affected LSP-00-35, where, due to an editing error,
+the test was described as being on the SDSS Stripe 82 data, not the WISE data.
+
+\subsection{Hardware}
+
+The tests were carried out on the initial PDAC hardware configuration at NCSA with its late 2017 upgrade to a more capable server with solid state disk for the Qserv czar node.
+
+\subsection{Software}
+
+A variety of versions of Qserv and DAX software were used in the API Aspect as issues were discovered and corrected.
+The final versions, on which all of the tests reported here were repeated, were:
+
+(insert table)
+
+The Portal Aspect used the following software versions, installed in PDAC on January 24, 2018 and retained throughout the testing:
+
+\begin{itemize}
+\item{The \verb|firefly| back end package: SHA be6cc56; and}
+\item{the \verb|suit| LSST-specific configuration package: SHA 4298ba0.}
+\end{itemize}
+
+
 \section{Personnel}
 \label{sect:personnel}
 
-All test cases were executed by Gregory Dubois-Felsmann (Caltech/IPAC).
+The majority of the test cases were executed by Gregory Dubois-Felsmann (Caltech/IPAC).
+All of LSP-00-20 and portions of LSP-00-15 and LSP-00-35 were also executed by Xiuqin Wu (Caltech/IPAC),
+from whose work most of the screen shots used arise.
 
 
 \subsection{Summary Table}
@@ -135,7 +165,7 @@ All test cases were executed by Gregory Dubois-Felsmann (Caltech/IPAC).
 LSP-00-00 & Pass & Refer to \S\ref{sect:detail-lsp-00-00}. \\\hline
 LSP-00-05 & Pass & Refer to \S\ref{sect:detail-lsp-00-05}. \\\hline
 LSP-00-10 & Pass & Refer to \S ref{sect:lsp-00-10}. \\\hline
-LSP-00-15 & Pass & Refer to \S ref{sect:lsp-00-15}. \\\hline
+LSP-00-15 & Pass & Refer to \S\ref{sect:detail-lsp-00-15}. \\\hline
 LSP-00-20 & Pass with reservations & Refer to \S\ref{sect:detail-lsp-00-20}. \\\hline
 LSP-00-35 & Pass & Refer to \S\ref{sect:detail-lsp-00-35}. \\\hline
 \end{longtable}
@@ -477,7 +507,7 @@ Table & Unique Object Keys & Rows & PDAC elapsed time & IRSA elapsed time \\ \hl
 ``Source'' \verb|wise_4band_00.allsky_4band_p1bs_psd| & 506 & 506 & 0.5 -- 0.6s & 1.6 -- 3.3s \\
 \end{tabular}
 \caption{Search results from small cone searches}
-\label{tab:conesyntax}
+\label{tab:coneresults}
 \end{table}
 
 All the sources found in the Object-like table were found in the ForcedSource-like table.
@@ -536,13 +566,13 @@ reported in the following section.
 \begin{tabular}{l l r r r}
 Table and key & ID type & Rows & PDAC elapsed time & IRSA elapsed time \\ \hline
 ``Object'' \verb|source_id| & string & 1 & 0.13 -- 0.20s & 1.4 -- 5.3s \\
-``Object'' \verb|cntr| & bigint(20) & 1 & 0.18 -- 0.19s\footnote{This query was executed with an added ``qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 )'' in the WHERE clause to avoid triggering a table scan.\label{fn:id-no-table-scan}} & 1.7 -- 10.5s \\
+``Object'' \verb|cntr| & bigint(20) & 1 & 0.18 -- 0.19s\footnote{This query was executed with an added ``qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 )'' in the WHERE clause to avoid triggering a table scan.} & 1.7 -- 10.5s \\  % \label{fn:id-no-table-scan}
 ``ForcedSource'' \verb|source_id_mf| & string & 25 & 0.18 -- 0.20s & 0.7 -- 4.5s \\
 ``ForcedSource'' \verb|cntr_mf| & bigint(20) & 25 & 0.11 -- 0.41s\footnotemark[4] & 0.7 -- 30.0s\footnote{Most results were in the 2.5--3s range; 30s times appeared a few time } \\
 ``Source'' & string & 1 & 0.18 -- 0.21s & 1.5 -- 5.2s \\
 \end{tabular}
 \caption{Search results from queries by identifier}
-\label{tab:conesyntax}
+\label{tab:idresults}
 \end{table}
 
 The ForcedSource-like searches returned the same light curves that were contained in the cone search results above, confirming the key relationship and its indexing were set up correctly.
@@ -561,6 +591,8 @@ i.e., where the indexing can only accelerate the per-shard queries but cannot yi
 
 \section{LSP-00-15: Execution of basic catalog queries in the Portal}
 \label{sect:detail-lsp-00-15}
+
+\input lsp-00-15/lsp-00-15.tex
 
 \section{LSP-00-20: Operation of the UI for interaction with tabular data results}
 \label{sect:detail-lsp-00-20}
