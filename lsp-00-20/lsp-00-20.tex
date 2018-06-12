@@ -40,11 +40,19 @@ Neither of these limits is functionally essential.
 The Portal and the underlying DAX and Qserv interfaces can handle much larger search areas while preserving good performance.
 The polygon search interface exposed by the Portal can be used to query much larger areas while still yielding latencies compatible with interactive work, as noted in LSP-00-15 above,
 so there is no reason to limit the cone search so dramatically.
-For example, an XXX sq. deg. polygon search in the Object-like AllWISE Source Catalog executes in YYY seconds, and the resulting ZZZ row result table can be browsed and analyzed interactively with good performance.
+For example, a 100 sq. deg. polygon search in the Object-like AllWISE Source Catalog executes in about two minutes,
+but then the resulting 1,318,805 row result table can be browsed and analyzed interactively with good performance,
+with the generation and display of 1D or 2D histograms, even on computed columns, taking only 2-4 seconds.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{lsp-00-20/million-query.png}
+  \caption{Result screen for a query with 1,318,805 result rows}
+  \label{fig:lsp-00-20-million-query}
+\end{figure}
 
 The limit on the scatterplot density is also overly conservative, though not by as large a factor.
-The current \verb|Plotly| implementation begins to slow down significantly when more than 20,000 points are displayed.
-The scatterplot limit has recently been raised in IRSA production, and there is no reason not to do this in LSST.
+The current \verb|Plotly| implementation only begins to slow down significantly when more than 20,000 points are displayed.
+Accordingly, the scatterplot limit has recently been raised in IRSA production, and there is no reason not to do this in LSST.
 
 In addition, as described in the Summary section above, an alternate \verb|Plotly| implementation, based on WebGL, is available which should scale to much larger plots.
 
