@@ -1,0 +1,167 @@
+% Content for the test report for LSP-00-05
+
+The tests were performed primarily from an Apple laptop computer running OS X 10.11.6,
+wirelessly connected to the Internet and using the NCSA VPN at \texttt{vpn.ncsa.illinois.edu}.
+API Aspect queries were performed using a combination of the Python \texttt{requests} package and the \texttt{curl} command.
+Notebooks were executed using Jupyter versions up through 5.4.1 and Python version 3.6.1.
+
+\subsection{API Aspect tests}
+
+This test case consisted only of API Aspect tests.
+
+The API Aspect tests made use of the "v0" \texttt{dbserv} service at 
+
+\begin{center}
+\texttt{http://lsst-qserv-dax01.ncsa.illinois.edu:5000/db/v0/tap/sync},
+\end{center}
+
+as for LSP-00-00 above.
+
+Comparison data was obtained from the IRSA TAP service at
+
+\begin{center}
+\texttt{https://irsa.ipac.caltech.edu/TAP/sync}.
+\end{center}
+
+This service accepts SQL queries, forwards them to Qserv for execution, and returns the results as JSON structures.
+The open-source Python \emph{Requests} package\footnote{\texttt{http://github.com/requests/requests}} was used to perform the HTTP GET and POST operations required, and to parse the returned JSON structures into Python dictionaries.
+The builtin Python \texttt{xml.etree.ElementTree} class was used to parse the VOTable data returned from the IRSA TAP service.
+
+\subsubsection{Summary}
+
+The tests successfully verified that the PDAC and IRSA services return the same data for small-diameter cone searches, 
+down to floating point roundoff issues associated with the return of data as ASCII strings.
+
+The cone search queries were performed in the Galactic plane near Galactic coordinates ( 30, 0 ),
+expressed as ( \emph{ra} = 281.5, \emph{dec} = -2.6 ), with a radius of 100 arcseconds.
+The radius was chosen to match the largest currently available radius for cone searches in the Portal UI 
+(a relatively arbitrary number originally chosen based on IRSA experience with querying the MultiEpoch Photometry table).
+
+In general the PDAC queries executed substantially more quickly than the IRSA ones.
+IRSA queries on the tables tested took several times longer.
+The IRSA times fluctuated more on repeated access, 
+presumably because IRSA is an active community archive and has a fluctuating load of other queries.
+Some dependence on time of day was observed in the IRSA query performance,
+which would be consistent with performance depending on community load.
+Occasional large outliers were observed.
+
+The PDAC DAX \verb|dbserv| cannot yet be described as a true TAP service,
+though it is planned to develop into one.
+By way of comparison:
+
+\begin{itemize}
+\item{The two services do not accept the same language at this time.
+DAX \texttt{dbserv} ``v0'' does not implement ADQL spatial query constructs, 
+but does require the use of special Qserv UDFs to enable optimized spatial queries.
+As a result, the spatial \texttt{WHERE} clauses look quite different.}
+\item{The \verb|dbserv| service does not yet support returning data in VOTable format.
+Currently JSON is the primary format for internal use in the PDAC and between SUIT and \verb|dbserv|.
+It is still undecided how this will develop:
+e.g., whether we will develop a variant of VOTable with a more optimal bulk data representation but still use the VOTable XML ``header'' for table metadata.}
+\end{itemize}
+
+A small fraction of the time (very roughly 2-3\%) queries against the PDAC \verb|dbserv| were observed to fail,
+apparently randomly, and always succeeded upon retry.
+The SUIT developers have also observed this during the implementation of the Portal interfaces to \verb|dbserv|.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l}
+TAP Service & \texttt{WHERE} clause \\ \hline
+PDAC \texttt{dbserv} & \verb|qserv_areaspec_circle(| \texttt{281.5, -2.6, 0.027777777777777776 )} \\
+IRSA (ADQL) & \texttt{CONTAINS(POINT('J2000',ra,dec),CIRCLE('J2000',281.5,-2.6,0.027777777777777776))=1} \\
+\end{tabular}
+\caption{Comparison of PDAC and IRSA cone search query syntax}
+\label{tab:conesyntax}
+\end{table}
+
+\subsubsection{Cone Search Queries}
+
+The cone-search queries returned the following results, with a range of elapsed times noted for repeating the query several times.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.5 \linewidth} p{0.1 \linewidth} p{0.1 \linewidth} p{0.12 \linewidth} p{0.12 \linewidth}}
+Table & Unique Object Keys & Rows & PDAC elapsed time & IRSA elapsed time \\ \hline
+``Object'' \verb|wise_00.allwise_p3as_psd| & 48 & 48 & 0.2 -- 0.6s & 1.4 -- 3.2s \\
+``ForcedSource'' \verb|wise_00.allwise_p3as_mep| & 56 & 1377 & 0.8 -- 1.8s & 6.1 -- 6.6s \\
+``Source'' \verb|wise_4band_00.allsky_4band_p1bs_psd| & 506 & 506 & 0.5 -- 0.6s & 1.6 -- 3.3s \\
+\end{tabular}
+\caption{Search results from small cone searches}
+\label{tab:coneresults}
+\end{table}
+
+All the sources found in the Object-like table were found in the ForcedSource-like table.
+Note that the WISE data analysis includes forced photometry on lower-quality objects,
+not just those in the main Object-like ``AllWISE Source Catalog'';
+this is why there are more unique object keys in the ForcedSource-like table search result than in the Object-like search result.
+
+All the IDs were tested for exact equality, with no failures.
+All queries retrieved \verb|ra|, \verb|decl|, and the WISE W1 and W1 magnitudes \verb|w1mpro| and \verb|w2mpro|.
+The time-dependent queries also retrieved the MJD mid-point of the corresponding observations.
+All these floating-point values were found to be equal to the limits of the round trip through the slightly different ASCII formats produced by the two services;
+in general discrepancies occurred when the IRSA TAP service returned additional non-significant digits,
+producing values like 4.3340000000000005.
+
+\subsubsection{Identifier Search Queries}
+
+One of the results from the cone search test query, WISE \verb|source_id| ``2813m031\_ac51-041856'',
+numeric ID (\verb|cntr|) 2813003101351041856,
+was chosen as the target for tests of querying by a source identifier.
+This identifier was then used for queries against the Object-like and ForcedSource-like tables;
+in the ForcedSource-like table the identifier was used to query against \verb|source_id_mf|,
+the ID of the parent object rather than of the individual forced photometry measurement,
+or against \verb|cntr_mf|, the corresponding numeric ID.
+
+Because no source association was done on the WISE single-epoch sources,
+the same identifier could not be used to test against the single-epoch Source-like table.
+A single identifier, ``03245b121-000010'', chosen from the cone search test against the Source-like table,
+was used to perform a comparable, though not particularly interesting, test on the Source-like table.
+
+Pure identifier searches on the numeric ids, \verb|cntr| and \verb|cntr_mf|,
+were impractical on the PDAC tables because these triggered table scans (see \S ref{sect:detail-lsp-00-10} below).
+This is because, currently:
+
+\begin{enumerate}
+\item{No Qserv ``secondary index'' for this identifier was created, so Qserv must attempt to search every shard.}
+\item{The PDAC tables were not indexed on this identifier in the chunks, so every shard search is itself necessarily a table scan.}
+\end{enumerate}
+
+This issue arose during PDAC development,
+and a workaround was used in the implementation of the initial Portal Aspect prototype for light curve retrieval.
+Given a target already located in a search on the Object-like table,
+in order to look up the light curve in the ForcedSource-like table, 
+a search was performed on the combination of the numeric ID and a small spatial cone around the known location of the target.
+Because of a current Qserv implementation restriction,
+the spatial cone must appear first in the WHERE clause, i.e.:
+``WHERE qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 ) AND cntr\_mf=2813003101351041856''.
+
+This workaround is not a satisfactory solution for general ID lookup, of course.
+However, as a matter of interest,
+times for these spatially-restricted numeric identifier searches on PDAC are reported here and may be compared to the equivalent pure numeric-ID searches at IRSA,
+and to their table-scan equivalents, omitting the auxiliary spatial cone restriction,
+reported in the following section.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l r r r}
+Table and key & ID type & Rows & PDAC elapsed time & IRSA elapsed time \\ \hline
+``Object'' \verb|source_id| & string & 1 & 0.13 -- 0.20s & 1.4 -- 5.3s \\
+``Object'' \verb|cntr| & bigint(20) & 1 & 0.18 -- 0.19s\footnote{This query was executed with an added ``qserv\_areaspec\_circle( 281.4933836, -2.6186303, 0.005 )'' in the WHERE clause to avoid triggering a table scan.} & 1.7 -- 10.5s \\  % \label{fn:id-no-table-scan}
+``ForcedSource'' \verb|source_id_mf| & string & 25 & 0.18 -- 0.20s & 0.7 -- 4.5s \\
+``ForcedSource'' \verb|cntr_mf| & bigint(20) & 25 & 0.11 -- 0.41s\footnotemark[4] & 0.7 -- 30.0s\footnote{Most results were in the 2.5--3s range; 30s times appeared a few time } \\
+``Source'' & string & 1 & 0.18 -- 0.21s & 1.5 -- 5.2s \\
+\end{tabular}
+\caption{Search results from queries by identifier}
+\label{tab:idresults}
+\end{table}
+
+The ForcedSource-like searches returned the same light curves that were contained in the cone search results above, confirming the key relationship and its indexing were set up correctly.
+
+Private discussion with IRSA engineering staff suggests that the main difference in performance arises from overhead in the IRSA TAP service, not the underlying database.
+If this can be remedied, this discussions suggest that the performance difference vs. Qserv for small indexed queries might go away.
+
+The performance of Qserv at the scale deployed in PDAC, for small queries,
+appears quite suitable for responsive interactive work as long as the queries can be optimized by Qserv to select a subset of shards.
+What is not clear from the tests available in the current PDAC deployment is what the performance of Qserv will be when applied to indexed attributes that are not spatially correlated ---
+i.e., where the indexing can only accelerate the per-shard queries but cannot yield any reduction in the number of shards on which the query must be executed.
