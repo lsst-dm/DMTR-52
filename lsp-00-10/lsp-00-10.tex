@@ -195,25 +195,37 @@ All & 10,546,932 \\
 \label{tab:lsp-00-10-16-degree-scans}
 \end{table}
 
-%% \subsubsection{Step 4 --- High volume queries}
+\subsubsection{Step 4 --- High volume queries}
 
-%% ``High-volume'' queries, by contrast, are expected to be ones that perform scans over all or almost all the shards in the Qserv system.
-%% The performance specification for these is that 20 simultaneous queries, with result sets no larger than 6GB,
-%% can be carried out simultaneously --- clearly, as shared scans --- while maintaining a one hour latency.
+``High-volume'' queries, by contrast, are expected to be ones that perform scans over all or almost all the shards in the Qserv system.
+The performance specification for these is that 20 simultaneous queries, with result sets no larger than 6GB,
+can be carried out simultaneously --- clearly, as shared scans --- while maintaining a one hour latency.
 
-%% Once again, the purpose of the present test was not to verify the performance specification,
-%% but merely to exercise queries of this type.
+Once again, the purpose of the present test was not to verify the performance specification,
+but merely to exercise queries of this type.
 
-%% All-sky queries were carried out for a selection of values of a cut on \verb|w1mpro|,
-%% testing both the ``wide'' (\texttt{SELECT *}) and ``narrow'' query types above.
-%% Scaled by the number of Object-like rows in the AllWISE database compared to the expected LSST Object table,
-%% a result set target of 225MB was estimated.
+All-sky queries were carried out for a selection of values of a cut on \verb|w1mpro|,
+testing both the ``wide'' (\texttt{SELECT *}) and ``narrow'' query types above.
+Scaled by the number of Object-like rows in the AllWISE database compared to the expected LSST Object table,
+a result set target of 225MB was estimated.
+In practice result sets of up to 313 MB were exercised.
+All of these tests completed in 15--20 minutes.
 
-%% \begin{table}[h]
-%% \centering
-%% \begin{tabular}{r r r r}
-%% \texttt{w1mpro} cut & rows & MB & query time(s) & transfer time (s) & MB & query time(s) & transfer time (s) \\ \hline
-%% \end{tabular}
-%% \caption{Results for ``high-volume'', all-sky table-scan queries on the AllWISE Object-like table; 16}
-%% \label{tab:lsp-00-10-all-sky-scans}
-%% \end{table}
+More complex \verb|WHERE| clauses should be exercised in future tests,
+as well as the critical use case of spatial joins, which were not explored here.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{r r r r r r r r}
+ & & \multicolumn{3}{c}{Narrow column selection} & \multicolumn{3}{c}{\texttt{SELECT *}} \\ \hline
+\texttt{w1mpro} &  & query & transfer &  & query & transfer &  \\
+cut & rows & time (s) & time (s) & bytes & time(s) & time (s) & bytes \\ \hline
+4.0 & 28,467 & 915.270 & 0.013 & 2,152,760 & 1030.500 & 0.247 & 61,605,670 \\
+4.5 & 50,097 & 918.895 & 0.024 & 3,784,044 & 1088.995 & 0.390 & 108,131,490 \\
+5.0 & 86,542 & 919.346 & 0.043 & 6,535,633 & 1129.759 & 0.579 & 186,377,582 \\
+5.5 & 145,792 & 939.140 & 0.061 & 11,012,287 & 1178.091 & 1.007 & 313,447,188 \\
+All & 747,634,026 \\
+\end{tabular}
+\caption{Results for ``high-volume'', all-sky table-scan queries on the AllWISE Object-like table}
+\label{tab:lsp-00-10-all-sky-scans}
+\end{table}
