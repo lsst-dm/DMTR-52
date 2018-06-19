@@ -19,9 +19,7 @@
 
 % Most recent last
 \setDocChangeRecord{
-\addtohist{1.1}{2018-06-12}{Draft of complete report}{Dubois-Felsmann}
-\addtohist{1}{2018-04-22}{Initial version}{Dubois-Felsmann}
-
+\addtohist{}{2018-06-12}{Draft of complete report}{G.~Dubois-Felsmann}
 }
 
 \setDocCurator{Gregory P. Dubois-Felsmann}
@@ -72,12 +70,12 @@ The WISE catalog data to be loaded included the following tables:
 
 \item AllWISE Source Catalog: this catalog is comparable to the projected LSST \texttt{Object} table, arising from source detection performed on the coaddition of all the data from the pre-hibernation year of WISE operations, including the primary 4-band data as well as shorter periods of 3-band (W1,W2,W3) and 2-band (W1,W2) data taken after the exhaustion of the stored cryogen.
 
-\item AllWISE Multi-Epoch Photometry (MEP) Table: roughly comparable to LSST \texttt{ForcedSource}, arising from forced photometry on every single-epoch image, based on the sources in the AllWISE Source Catalog.  
+\item AllWISE Multi-Epoch Photometry (MEP) Table: roughly comparable to LSST \texttt{ForcedSource}, arising from forced photometry on every single-epoch image, based on the sources in the AllWISE Source Catalog.
 Differs from \texttt{ForcedSource} in that WISE takes all four band images at once, so every row in this table contains data from all four bands.
 
-\item Single-Epoch Photometry tables from four eras of the mission, comparable to LSST \texttt{Source}.  
-Similarly to the MEP Table, the WISE imaging model produces measurements in each available band in each row.  
-As the W4 and then W3 bands were shut down as the spacecraft warmed up, their columns were dropped from the table, leading to an evolution of the schema with time.  
+\item Single-Epoch Photometry tables from four eras of the mission, comparable to LSST \texttt{Source}.
+Similarly to the MEP Table, the WISE imaging model produces measurements in each available band in each row.
+As the W4 and then W3 bands were shut down as the spacecraft warmed up, their columns were dropped from the table, leading to an evolution of the schema with time.
 The four eras and the associated official table names are:
   \begin{itemize}
   \item All-Sky Single Exposure (L1b) Source Table, from the primary cold mission, with all four bands operating;
@@ -94,12 +92,12 @@ The rest of this report covers the six test cases into which this work was divid
 \label{sect:systemoverview}
 
 The \product{} is the part of the LSST Data Management System which presents the LSST Data Products,
-a user computational environment, and a set of tools for interacting with them, 
+a user computational environment, and a set of tools for interacting with them,
 to LSST's science users.
 
 The system under test is the initial deployment of the \product{} in the Prototype Data Access Center (PDAC),
 an initial application of the NCSA-provided ``integration environment''.
-In the tested version of the PDAC, 
+In the tested version of the PDAC,
 elements of the database systems (including a Qserv prototype),
 a partial deployment of the API Aspect data access Web services (DAX),
 and an early version of the Science User Interface and Tools (SUIT) Portal were operated on a hardware cluster managed by NCSA.
